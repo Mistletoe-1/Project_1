@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NewCampaignModal, SalesReportModal } from './components/ActionOverlays.jsx';
 import { CampaignsView } from './components/Campaigns.jsx';
 import { ChannelPanel, InsightPanel, RevenueChart, StatGrid, TaskPanel } from './components/Dashboard.jsx';
@@ -6,6 +6,7 @@ import { Sidebar, Topbar } from './components/Layout.jsx';
 import { MembersView } from './components/Members.jsx';
 import { OrdersView } from './components/Orders.jsx';
 import { ProductsView } from './components/Products.jsx';
+import { advanceOrder, createCampaign, getBootstrap, restockProduct } from './api/adminApi.js';
 import {
   channelSeries,
   initialCampaigns,
@@ -53,13 +54,13 @@ const nextStatus = {
   已完成: '已完成'
 };
 
-function DashboardView({ tasks, onToggleTask, onOpenReport }) {
+function DashboardView({ dashboardStats, revenueData, channelData, tasks, onToggleTask, onOpenReport }) {
   return (
     <>
-      <StatGrid stats={stats} />
+      <StatGrid stats={dashboardStats} />
       <div className="dashboardGrid">
-        <RevenueChart data={revenueSeries} onOpenReport={onOpenReport} />
-        <ChannelPanel channels={channelSeries} />
+        <RevenueChart data={revenueData} onOpenReport={onOpenReport} />
+        <ChannelPanel channels={channelData} />
         <TaskPanel tasks={tasks} onToggleTask={onToggleTask} />
         <InsightPanel />
       </div>
@@ -71,15 +72,52 @@ export default function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [search, setSearch] = useState('');
   const [orderFilter, setOrderFilter] = useState('全部');
+  const [dashboardStats, setDashboardStats] = useState(stats);
+  const [revenueData, setRevenueData] = useState(revenueSeries);
+  const [channelData, setChannelData] = useState(channelSeries);
   const [orders, setOrders] = useState(initialOrders);
   const [products, setProducts] = useState(initialProducts);
+  const [memberList, setMemberList] = useState(members);
   const [campaigns, setCampaigns] = useState(initialCampaigns);
   const [tasks, setTasks] = useState(seedTasks);
   const [toast, setToast] = useState('');
+  const [apiReady, setApiReady] = useState(false);
   const [notifications, setNotifications] = useState(initialNotifications);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadRemoteData() {
+      try {
+        const data = await getBootstrap();
+        if (ignore) return;
+
+        setDashboardStats(data.stats || stats);
+        setRevenueData(data.revenueSeries || revenueSeries);
+        setChannelData(data.channelSeries || channelSeries);
+        setOrders(data.orders || initialOrders);
+        setProducts(data.products || initialProducts);
+        setMemberList(data.members || members);
+        setCampaigns(data.campaigns || initialCampaigns);
+        setTasks(data.tasks || seedTasks);
+        setApiReady(true);
+      } catch (error) {
+        if (!ignore) {
+          setApiReady(false);
+          console.info('API 未启动，当前使用本地 mock 数据。');
+        }
+      }
+    }
+
+    loadRemoteData();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const activeLabel = useMemo(() => {
     return navItems.find((item) => item.id === activeView)?.label || '运营看板';
@@ -95,22 +133,38 @@ export default function App() {
     showToast.timer = window.setTimeout(() => setToast(''), 2800);
   }
 
-  function handleAdvanceOrder(id) {
-    setOrders((currentOrders) =>
-      currentOrders.map((order) =>
-        order.id === id ? { ...order, status: nextStatus[order.status] || order.status } : order
-      )
-    );
-    showToast(`${id} 已推进到下一处理节点`);
+  async function handleAdvanceOrder(id) {
+    try {
+      const updatedOrder = await advanceOrder(id);
+      setOrders((currentOrders) =>
+        currentOrders.map((order) => (order.id === id ? updatedOrder : order))
+      );
+      showToast(`${id} 已通过后端接口推进状态`);
+    } catch (error) {
+      setOrders((currentOrders) =>
+        currentOrders.map((order) =>
+          order.id === id ? { ...order, status: nextStatus[order.status] || order.status } : order
+        )
+      );
+      showToast(`${id} 已本地推进状态`);
+    }
   }
 
-  function handleRestock(id) {
-    setProducts((currentProducts) =>
-      currentProducts.map((product) =>
-        product.id === id ? { ...product, stock: product.stock + 24 } : product
-      )
-    );
-    showToast('已生成补货记录，库存同步增加 24 件');
+  async function handleRestock(id) {
+    try {
+      const updatedProduct = await restockProduct(id);
+      setProducts((currentProducts) =>
+        currentProducts.map((product) => (product.id === id ? updatedProduct : product))
+      );
+      showToast('后端已生成补货记录，库存增加 24 件');
+    } catch (error) {
+      setProducts((currentProducts) =>
+        currentProducts.map((product) =>
+          product.id === id ? { ...product, stock: product.stock + 24 } : product
+        )
+      );
+      showToast('已本地生成补货记录，库存增加 24 件');
+    }
   }
 
   function handleToggleTask(index) {
@@ -119,7 +173,7 @@ export default function App() {
     );
   }
 
-  function handleCreateCampaign(event) {
+  async function handleCreateCampaign(event) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const title = form.get('title').trim();
@@ -131,12 +185,21 @@ export default function App() {
 
     if (!title) return;
 
-    setCampaigns((currentCampaigns) => [
-      { title, owner, budget, status: '排期中', date },
-      ...currentCampaigns
-    ]);
+    const payload = { title, owner, budget, date };
+
+    try {
+      const createdCampaign = await createCampaign(payload);
+      setCampaigns((currentCampaigns) => [createdCampaign, ...currentCampaigns]);
+      showToast(`活动「${title}」已通过后端接口加入排期`);
+    } catch (error) {
+      setCampaigns((currentCampaigns) => [
+        { ...payload, status: '排期中' },
+        ...currentCampaigns
+      ]);
+      showToast(`活动「${title}」已本地加入排期`);
+    }
+
     event.currentTarget.reset();
-    showToast(`活动「${title}」已加入排期`);
     setCreateModalOpen(false);
     setActiveView('campaigns');
   }
@@ -187,8 +250,15 @@ export default function App() {
           onResolveNotice={handleResolveNotice}
         />
 
+        <div className={`apiStatus ${apiReady ? 'isOnline' : 'isLocal'}`}>
+          {apiReady ? 'Node.js API 已连接' : '本地 mock 数据模式'}
+        </div>
+
         {activeView === 'dashboard' && (
           <DashboardView
+            dashboardStats={dashboardStats}
+            revenueData={revenueData}
+            channelData={channelData}
             tasks={tasks}
             onToggleTask={handleToggleTask}
             onOpenReport={handleOpenReport}
@@ -206,7 +276,7 @@ export default function App() {
         {activeView === 'products' && (
           <ProductsView products={products} search={search} onRestock={handleRestock} />
         )}
-        {activeView === 'members' && <MembersView members={members} search={search} />}
+        {activeView === 'members' && <MembersView members={memberList} search={search} />}
         {activeView === 'campaigns' && (
           <CampaignsView campaigns={campaigns} onCreateCampaign={handleCreateCampaign} />
         )}
@@ -220,8 +290,8 @@ export default function App() {
       <SalesReportModal
         open={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
-        revenue={revenueSeries}
-        channels={channelSeries}
+        revenue={revenueData}
+        channels={channelData}
       />
       {toast && <div className="toast">{toast}</div>}
     </div>

@@ -741,6 +741,40 @@ p {
   to { opacity: 1; }
 }
 
+
+.apiStatus {
+  width: fit-content;
+  min-height: 30px;
+  margin: -8px 0 18px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--muted);
+}
+
+.apiStatus::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.apiStatus.isOnline {
+  color: var(--primary-dark);
+  background: #edf7ef;
+  border-color: #d6e8db;
+}
+
+.apiStatus.isOnline::before {
+  background: var(--primary);
+}
 .statGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1571,3 +1605,4 @@ td small {
     transition-duration: 0.01ms !important;
   }
 }
+
