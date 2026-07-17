@@ -1108,6 +1108,35 @@ td small {
   color: #6f6551;
 }
 
+.riskTag.risk-高风险 {
+  background: #fdebe7;
+  color: #a84f42;
+}
+
+.riskTag.risk-需关注 {
+  background: #fff3df;
+  color: #9c6420;
+}
+
+.riskRow td {
+  background: rgba(253, 235, 231, 0.24);
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.textAction {
+  border: 0;
+  background: transparent;
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 7px 0;
+}
+
 .rowButton {
   min-height: 34px;
   padding: 0 11px;
@@ -1220,6 +1249,36 @@ td small {
   color: var(--primary-dark);
   font-size: 13px;
   font-weight: 800;
+}
+
+.restockAdvice {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: -4px 0 14px;
+}
+
+.restockAdvice span {
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 9px;
+  background: #edf4ef;
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.restockAdvice span.isUrgent {
+  background: #fdebe7;
+  color: #a84f42;
+}
+
+.restockAdvice p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .membersLayout,
@@ -1364,6 +1423,40 @@ td small {
   font-size: 13px;
 }
 
+.campaignGoal {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.campaignMetrics {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.campaignMetrics > div:not(.budgetRing) {
+  min-width: 52px;
+  text-align: center;
+}
+
+.campaignMetrics > div:not(.budgetRing) strong,
+.campaignMetrics > div:not(.budgetRing) span {
+  display: block;
+}
+
+.campaignMetrics > div:not(.budgetRing) strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
+.campaignMetrics > div:not(.budgetRing) span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .budgetRing {
   width: 92px;
   height: 92px;
@@ -1401,6 +1494,214 @@ td small {
   font-size: 14px;
   box-shadow: var(--shadow);
   animation: toastIn 0.32s ease both;
+}
+
+.priorityPanel {
+  min-height: 236px;
+}
+
+.priorityList {
+  display: grid;
+  gap: 10px;
+}
+
+.priorityItem {
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-muted);
+  color: var(--text);
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  text-align: left;
+}
+
+.priorityItem:hover {
+  border-color: #cadbd0;
+  background: #f2f7f3;
+}
+
+.riskScore {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #fff3df;
+  color: #9c6420;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.riskScore.isHigh {
+  background: #fdebe7;
+  color: #a84f42;
+}
+
+.priorityItem strong,
+.priorityItem small {
+  display: block;
+}
+
+.priorityItem strong {
+  font-size: 13px;
+}
+
+.priorityItem small,
+.priorityItem em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.priorityItem small {
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawerLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 32;
+  background: rgba(31, 45, 40, 0.24);
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease both;
+}
+
+.orderDrawer {
+  width: min(480px, 100%);
+  min-height: 100%;
+  padding: 26px;
+  overflow: auto;
+  background: white;
+  box-shadow: -20px 0 55px rgba(31, 45, 40, 0.18);
+  animation: drawerIn 0.25s ease both;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.drawerHeader span,
+.drawerSection > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.drawerHeader h2 {
+  margin: 6px 0 0;
+  font-size: 27px;
+}
+
+.riskHero {
+  margin: 26px 0 18px;
+  padding: 19px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2b4a40, #315f50);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.riskHero span {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+.riskHero strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.riskHero p {
+  margin: 0;
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.drawerSection {
+  margin: 22px 0;
+}
+
+.factorList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.factorList b {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 10px;
+  padding: 0 10px;
+  background: #fff3df;
+  color: #9c6420;
+  font-size: 12px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detailGrid div {
+  padding: 13px;
+  border-radius: 14px;
+  background: var(--surface-muted);
+}
+
+.detailGrid span,
+.detailGrid strong {
+  display: block;
+}
+
+.detailGrid span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.detailGrid strong {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.timelineList {
+  display: grid;
+  gap: 13px;
+  margin: 11px 0 0;
+  padding: 0 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.timelineList li::marker {
+  color: var(--primary);
+}
+
+@keyframes drawerIn {
+  from { transform: translateX(34px); }
+  to { transform: translateX(0); }
 }
 
 @keyframes toastIn {
@@ -1526,6 +1827,10 @@ td small {
     align-items: stretch;
   }
 
+  .campaignMetrics {
+    justify-content: flex-start;
+  }
+
   .segmented {
     overflow-x: auto;
     flex-wrap: nowrap;
@@ -1563,6 +1868,14 @@ td small {
   .modalLayer {
     padding: 14px;
     align-items: end;
+  }
+
+  .orderDrawer {
+    width: 100%;
+    min-height: auto;
+    max-height: calc(100vh - 12px);
+    margin-top: 12px;
+    border-radius: 24px 24px 0 0;
   }
 
   .campaignModal,

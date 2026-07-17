@@ -41,11 +41,16 @@ export function CampaignsView({ campaigns, onCreateCampaign }) {
             <div>
               <span className="status 待发货">{campaign.status}</span>
               <h2>{campaign.title}</h2>
-              <p>{campaign.owner} · {campaign.date}</p>
+              <p>{campaign.owner} · {campaign.date} · {campaign.channel || '待定渠道'}</p>
+              <small className="campaignGoal">{campaign.goal || '待补充运营目标'}</small>
             </div>
-            <div className="budgetRing" style={{ '--value': `${campaign.budget}%` }}>
-              <strong>{campaign.budget}%</strong>
-              <span>预算</span>
+            <div className="campaignMetrics">
+              <div><strong>{campaign.conversion || '—'}</strong><span>转化率</span></div>
+              <div><strong>{campaign.roi || '—'}</strong><span>ROI</span></div>
+              <div className="budgetRing" style={{ '--value': `${campaign.budget}%` }}>
+                <strong>{campaign.budget}%</strong>
+                <span>预算</span>
+              </div>
             </div>
           </article>
         ))}

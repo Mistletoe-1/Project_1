@@ -1,8 +1,9 @@
 import Icon from './Icons.jsx';
+import { getRiskProfile } from './DecisionPanel.jsx';
 
 const statusOptions = ['全部', '待审核', '待发货', '运输中', '售后中', '已完成'];
 
-export function OrdersView({ orders, search, filter, onFilterChange, onAdvanceOrder }) {
+export function OrdersView({ orders, search, filter, onFilterChange, onAdvanceOrder, onOpenOrder }) {
   const visibleOrders = orders.filter((order) => {
     const inFilter = filter === '全部' || order.status === filter;
     const keyword = search.trim().toLowerCase();
@@ -46,23 +47,26 @@ export function OrdersView({ orders, search, filter, onFilterChange, onAdvanceOr
             </tr>
           </thead>
           <tbody>
-            {visibleOrders.map((order) => (
-              <tr key={order.id}>
+            {visibleOrders.map((order) => {
+              const profile = getRiskProfile(order);
+              return (
+              <tr key={order.id} className={profile.level === '高风险' ? 'riskRow' : ''}>
                 <td><strong>{order.id}</strong><small>{order.time}</small></td>
                 <td>{order.customer}</td>
                 <td>{order.city}</td>
                 <td>¥{order.amount.toLocaleString()}</td>
                 <td>{order.channel}</td>
                 <td><span className={`status ${order.status}`}>{order.status}</span></td>
-                <td><span className="riskTag">{order.risk}</span></td>
+                <td><span className={`riskTag risk-${profile.level}`}>{profile.score} 分 · {profile.level}</span></td>
                 <td>
-                  <button className="rowButton" onClick={() => onAdvanceOrder(order.id)} type="button">
-                    处理
-                    <Icon name="chevron" size={15} />
-                  </button>
+                  <div className="rowActions">
+                    <button className="textAction" onClick={() => onOpenOrder(order)} type="button">详情</button>
+                    <button className="rowButton" onClick={() => onAdvanceOrder(order.id)} type="button">处理 <Icon name="chevron" size={15} /></button>
+                  </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

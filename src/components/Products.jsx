@@ -1,4 +1,5 @@
 import Icon from './Icons.jsx';
+import { getReplenishment } from './DecisionPanel.jsx';
 
 export function ProductsView({ products, search, onRestock }) {
   const visibleProducts = products.filter((product) => {
@@ -11,6 +12,7 @@ export function ProductsView({ products, search, onRestock }) {
       {visibleProducts.map((product) => {
         const stockRate = Math.min(100, Math.round((product.stock / (product.alert * 2)) * 100));
         const isLow = product.stock < product.alert;
+        const replenishment = getReplenishment(product);
 
         return (
           <article className={`productCard ${isLow ? 'needsStock' : ''}`} key={product.id}>
@@ -33,9 +35,13 @@ export function ProductsView({ products, search, onRestock }) {
               <div className="stockBar">
                 <span style={{ width: `${stockRate}%` }} />
               </div>
+              <div className="restockAdvice">
+                <span className={replenishment.level === '紧急' ? 'isUrgent' : ''}>{replenishment.level}补货</span>
+                <p>可售 {replenishment.daysCover} 天，建议补 {replenishment.quantity} 件</p>
+              </div>
               <button className="secondaryButton" onClick={() => onRestock(product.id)} type="button">
                 <Icon name="plus" size={16} />
-                快速补货 24 件
+                生成补货单
               </button>
             </div>
           </article>

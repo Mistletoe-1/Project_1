@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { NewCampaignModal, SalesReportModal } from './components/ActionOverlays.jsx';
 import { CampaignsView } from './components/Campaigns.jsx';
 import { ChannelPanel, InsightPanel, RevenueChart, StatGrid, TaskPanel } from './components/Dashboard.jsx';
+import { OrderDetailDrawer, RiskQueue } from './components/DecisionPanel.jsx';
 import { Sidebar, Topbar } from './components/Layout.jsx';
 import { MembersView } from './components/Members.jsx';
 import { OrdersView } from './components/Orders.jsx';
@@ -54,7 +55,7 @@ const nextStatus = {
   已完成: '已完成'
 };
 
-function DashboardView({ dashboardStats, revenueData, channelData, tasks, onToggleTask, onOpenReport }) {
+function DashboardView({ dashboardStats, revenueData, channelData, tasks, orders, onToggleTask, onOpenReport, onOpenOrder, onNavigate }) {
   return (
     <>
       <StatGrid stats={dashboardStats} />
@@ -62,6 +63,7 @@ function DashboardView({ dashboardStats, revenueData, channelData, tasks, onTogg
         <RevenueChart data={revenueData} onOpenReport={onOpenReport} />
         <ChannelPanel channels={channelData} />
         <TaskPanel tasks={tasks} onToggleTask={onToggleTask} />
+        <RiskQueue orders={orders} onOpenOrder={onOpenOrder} onNavigate={onNavigate} />
         <InsightPanel />
       </div>
     </>
@@ -86,6 +88,7 @@ export default function App() {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -137,17 +140,33 @@ export default function App() {
     try {
       const updatedOrder = await advanceOrder(id);
       setOrders((currentOrders) =>
-        currentOrders.map((order) => (order.id === id ? updatedOrder : order))
+        currentOrders.map((order) => (
+          order.id === id
+            ? { ...order, ...updatedOrder, timeline: [...(order.timeline || []), '刚刚 已推进订单状态'] }
+            : order
+        ))
       );
       showToast(`${id} 已通过后端接口推进状态`);
     } catch (error) {
       setOrders((currentOrders) =>
         currentOrders.map((order) =>
-          order.id === id ? { ...order, status: nextStatus[order.status] || order.status } : order
+          order.id === id
+            ? { ...order, status: nextStatus[order.status] || order.status, timeline: [...(order.timeline || []), '刚刚 已本地推进订单状态'] }
+            : order
         )
       );
       showToast(`${id} 已本地推进状态`);
     }
+
+    setSelectedOrder((current) => (
+      current && current.id === id
+        ? {
+            ...current,
+            status: nextStatus[current.status] || current.status,
+            timeline: [...(current.timeline || []), '刚刚 已推进订单状态并记录处理']
+          }
+        : current
+    ));
   }
 
   async function handleRestock(id) {
@@ -260,8 +279,11 @@ export default function App() {
             revenueData={revenueData}
             channelData={channelData}
             tasks={tasks}
+            orders={orders}
             onToggleTask={handleToggleTask}
             onOpenReport={handleOpenReport}
+            onOpenOrder={setSelectedOrder}
+            onNavigate={setActiveView}
           />
         )}
         {activeView === 'orders' && (
@@ -271,6 +293,7 @@ export default function App() {
             filter={orderFilter}
             onFilterChange={setOrderFilter}
             onAdvanceOrder={handleAdvanceOrder}
+            onOpenOrder={setSelectedOrder}
           />
         )}
         {activeView === 'products' && (
@@ -292,6 +315,11 @@ export default function App() {
         onClose={() => setReportModalOpen(false)}
         revenue={revenueData}
         channels={channelData}
+      />
+      <OrderDetailDrawer
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        onAdvance={handleAdvanceOrder}
       />
       {toast && <div className="toast">{toast}</div>}
     </div>
