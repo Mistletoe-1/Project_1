@@ -8,3 +8,4 @@ dist/
 coverage/
 .runtime-data.json
 .DS_Store
+"output/" 
