@@ -4,7 +4,7 @@
 
 ## 在线预览
 
-https://stately-duckanoo-c6f347.netlify.app/
+https://retailoperationback-end.netlify.app/
 
 > Netlify 为静态部署环境。Node.js 本地 API 未启动时，前端会自动使用 mock 数据，因此核心界面和交互仍可展示。
 
