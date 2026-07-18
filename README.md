@@ -15,17 +15,18 @@ https://stately-duckanoo-c6f347.netlify.app/
 - **库存补货决策**：结合日均销量、供货周期、在途库存和安全库存，计算可售天数与建议补货量。
 - **活动效果复盘**：展示活动目标、投放渠道、预算占用、转化率和 ROI，支持创建新的运营活动。
 - **工程化交互体验**：包含全局搜索、状态筛选、通知处理、表单弹窗、接口失败降级、响应式布局和本地 REST API 联调。
+- **本地持久化演示**：订单推进、库存补货和活动创建会写入本地运行时 JSON；重启 API 后仍能读取变更结果。
 
 ## 技术栈
 
-| 分类 | 技术 |
-| --- | --- |
-| 前端 | React 18、JavaScript、HTML5、CSS3 |
-| 构建工具 | Vite |
-| 本地服务 | Node.js 原生 HTTP 模块 |
+| 分类     | 技术                                   |
+| -------- | -------------------------------------- |
+| 前端     | React 18、JavaScript、HTML5、CSS3      |
+| 构建工具 | Vite                                   |
+| 本地服务 | Node.js 原生 HTTP 模块                 |
 | 数据交互 | Fetch、REST API、Vite Proxy、mock 降级 |
-| 部署 | Netlify |
-| 测试工具 | Playwright（已预留） |
+| 部署     | Netlify                                |
+| 测试工具 | Playwright                             |
 
 ## 功能模块
 
@@ -58,15 +59,18 @@ https://stately-duckanoo-c6f347.netlify.app/
 
 后端目录：`server/`
 
-| 方法 | 接口 | 说明 |
-| --- | --- | --- |
-| GET | `/api/health` | 健康检查 |
-| GET | `/api/bootstrap` | 获取看板、订单、商品、会员、活动和待办数据 |
-| PATCH | `/api/orders/:id` | 推进订单状态 |
-| PATCH | `/api/products/:id` | 商品补货，库存增加 24 件 |
-| POST | `/api/campaigns` | 创建运营活动 |
+| 方法  | 接口                 | 说明                                       |
+| ----- | -------------------- | ------------------------------------------ |
+| GET   | `/api/health`        | 健康检查                                   |
+| GET   | `/api/bootstrap`     | 获取看板、订单、商品、会员、活动和待办数据 |
+| PATCH | `/api/orders/:id`    | 推进订单状态                               |
+| PATCH | `/api/products/:id`  | 商品补货，库存增加 24 件                   |
+| PATCH | `/api/campaigns/:id` | 推进活动状态：排期、执行、复盘、归档       |
+| POST  | `/api/campaigns`     | 创建运营活动                               |
 
 前端请求封装位于 `src/api/adminApi.js`。本地开发时，Vite 将 `/api` 代理至 `http://127.0.0.1:3001`。
+
+运行时数据文件为 `server/.runtime-data.json`。它由 API 自动生成并被 `.gitignore` 排除；删除该文件即可恢复仓库中的初始演示数据。
 
 ## 本地运行
 
@@ -88,6 +92,14 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## 测试
+
+```bash
+npm test
+```
+
+测试覆盖运行时数据持久化、旧活动 ID 迁移，以及活动状态在 API 重启后的恢复。
 
 ## 项目结构
 
@@ -115,9 +127,3 @@ RetailOperationBack-end/
 ├── vite.config.js
 └── README.md
 ```
-
-## GitHub 上传说明
-
-请上传源代码、`package.json`、`package-lock.json`、`README.md`、`.gitignore`、`netlify.toml` 和配置文件。
-
-不要上传 `node_modules/`、`dist/`、`.env*`、日志、覆盖率目录和本地浏览器缓存。这些内容已由 `.gitignore` 忽略；他人在克隆项目后执行 `npm install` 即可恢复依赖。

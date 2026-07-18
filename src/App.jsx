@@ -194,9 +194,12 @@ export default function App() {
 
   async function handleCreateCampaign(event) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const title = form.get('title').trim();
     const owner = form.get('owner');
+    const channel = form.get('channel');
+    const goal = String(form.get('goal') || '').trim();
     const budget = Number(form.get('budget'));
     const startDate = form.get('startDate');
     const endDate = form.get('endDate');
@@ -204,21 +207,31 @@ export default function App() {
 
     if (!title) return;
 
-    const payload = { title, owner, budget, date };
+    const payload = {
+      title,
+      owner,
+      channel,
+      goal,
+      budget,
+      date,
+      status: '排期中',
+      conversion: '待复盘',
+      roi: '待复盘'
+    };
 
     try {
       const createdCampaign = await createCampaign(payload);
-      setCampaigns((currentCampaigns) => [createdCampaign, ...currentCampaigns]);
+      setCampaigns((currentCampaigns) => [{ ...payload, ...createdCampaign }, ...currentCampaigns]);
       showToast(`活动「${title}」已通过后端接口加入排期`);
     } catch (error) {
       setCampaigns((currentCampaigns) => [
-        { ...payload, status: '排期中' },
+        payload,
         ...currentCampaigns
       ]);
       showToast(`活动「${title}」已本地加入排期`);
     }
 
-    event.currentTarget.reset();
+    formElement.reset();
     setCreateModalOpen(false);
     setActiveView('campaigns');
   }

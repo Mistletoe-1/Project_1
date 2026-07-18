@@ -33,3 +33,7 @@ export function createCampaign(payload) {
     body: JSON.stringify(payload)
   });
 }
+
+export function advanceCampaign(id) {
+  return request(`/api/campaigns/${encodeURIComponent(id)}`, { method: 'PATCH' });
+}

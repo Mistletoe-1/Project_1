@@ -55,9 +55,9 @@ export const members = [
 ];
 
 export const initialCampaigns = [
-  { title: '周末会员专享日', owner: '运营组', budget: 68, status: '进行中', date: '7/13 - 7/14', goal: '提升高复购会员客单价', conversion: '14.8%', roi: '2.6', channel: '小程序' },
-  { title: '夏季新品预售', owner: '商品组', budget: 42, status: '排期中', date: '7/18 - 7/25', goal: '验证新品需求与订货量', conversion: '—', roi: '—', channel: '直播间' },
-  { title: '老客召回礼券', owner: 'CRM', budget: 88, status: '复盘中', date: '7/01 - 7/07', goal: '召回沉默 30 天以上会员', conversion: '8.4%', roi: '1.9', channel: '短信' }
+  { id: 'CAMP-001', title: '周末会员专享日', owner: '运营组', budget: 68, status: '进行中', date: '7/13 - 7/14', goal: '提升高复购会员客单价', conversion: '14.8%', roi: '2.6', channel: '小程序' },
+  { id: 'CAMP-002', title: '夏季新品预售', owner: '商品组', budget: 42, status: '排期中', date: '7/18 - 7/25', goal: '验证新品需求与订货量', conversion: '—', roi: '—', channel: '直播间' },
+  { id: 'CAMP-003', title: '老客召回礼券', owner: 'CRM', budget: 88, status: '复盘中', date: '7/01 - 7/07', goal: '召回沉默 30 天以上会员', conversion: '8.4%', roi: '1.9', channel: '短信' }
 ];
 
 export const tasks = [

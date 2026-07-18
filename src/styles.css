@@ -1828,7 +1828,26 @@ td small {
   }
 
   .campaignMetrics {
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 12px;
+  }
+
+  .campaignMetrics > div:not(.budgetRing) {
+    min-width: 0;
+  }
+
+  .campaignMetrics .budgetRing {
+    width: 82px;
+    height: 82px;
+    justify-self: center;
+  }
+
+  .campaignMetrics .campaignAdvance {
+    grid-column: 1 / -1;
+    justify-content: center;
+    width: 100%;
   }
 
   .segmented {

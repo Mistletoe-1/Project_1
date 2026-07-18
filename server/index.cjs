@@ -1,6 +1,8 @@
 const http = require('node:http');
 const { URL } = require('node:url');
-const data = require('./data.cjs');
+const { loadData, saveData } = require('./store.cjs');
+
+const data = loadData();
 
 const PORT = Number(process.env.PORT || 3001);
 
@@ -10,6 +12,13 @@ const nextStatus = {
   运输中: '已完成',
   售后中: '已完成',
   已完成: '已完成'
+};
+
+const nextCampaignStatus = {
+  排期中: '进行中',
+  进行中: '复盘中',
+  复盘中: '已归档',
+  已归档: '已归档'
 };
 
 function sendJson(res, status, payload) {
@@ -88,7 +97,10 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      const previousStatus = order.status;
       order.status = nextStatus[order.status] || order.status;
+      order.timeline = [...(order.timeline || []), `刚刚 状态由${previousStatus}更新为${order.status}`];
+      saveData(data);
       sendJson(res, 200, order);
       return;
     }
@@ -103,7 +115,24 @@ const server = http.createServer(async (req, res) => {
       }
 
       product.stock += 24;
+      product.lastRestockedAt = new Date().toISOString();
+      saveData(data);
       sendJson(res, 200, product);
+      return;
+    }
+
+    if (req.method === 'PATCH' && url.pathname.startsWith('/api/campaigns/')) {
+      const id = decodeURIComponent(url.pathname.split('/')[3] || '');
+      const campaign = data.campaigns.find((item) => item.id === id);
+
+      if (!campaign) {
+        sendJson(res, 404, { message: '活动不存在' });
+        return;
+      }
+
+      campaign.status = nextCampaignStatus[campaign.status] || campaign.status;
+      saveData(data);
+      sendJson(res, 200, campaign);
       return;
     }
 
@@ -117,14 +146,20 @@ const server = http.createServer(async (req, res) => {
       }
 
       const campaign = {
+        id: `CAMP-${Date.now()}`,
         title,
         owner: body.owner || '运营组',
         budget: Number(body.budget || 54),
         status: '排期中',
-        date: body.date || '待确认'
+        date: body.date || '待确认',
+        channel: body.channel || '小程序',
+        goal: body.goal || '待补充运营目标',
+        conversion: '待复盘',
+        roi: '待复盘'
       };
 
       data.campaigns.unshift(campaign);
+      saveData(data);
       sendJson(res, 201, campaign);
       return;
     }
